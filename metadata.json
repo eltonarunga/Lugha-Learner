@@ -1,0 +1,5 @@
+{
+  "name": "Lugha Learner",
+  "description": "A Duolingo-style language learning app for Kenyan languages. Learn Swahili, Luo, Kikuyu, and Kalenjin through interactive lessons, quizzes, and gamified progress tracking.",
+  "requestFramePermissions": []
+}
