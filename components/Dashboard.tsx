@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Language, Level, Lesson } from '../types';
 import { LESSON_DATA } from '../constants';
@@ -93,7 +92,7 @@ const LevelSection: React.FC<{ level: Level, languageId: string }> = ({ level, l
 }
 
 const Dashboard: React.FC<{ language: Language }> = ({ language }) => {
-  const { userProgress, logout } = useLugha();
+  const { userProgress, logout, setView } = useLugha();
   const languageData = LESSON_DATA[language.id];
 
   if (!languageData) {
@@ -106,6 +105,8 @@ const Dashboard: React.FC<{ language: Language }> = ({ language }) => {
         xp={userProgress.xp} 
         streak={userProgress.streak}
         onAvatarClick={logout}
+        onLanguageClick={() => setView('language-selection')}
+        onDictionaryClick={() => setView('dictionary')}
         language={{name: language.name, flag: language.flag}}
       />
       {languageData.levels.map(level => (

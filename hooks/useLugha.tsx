@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Language, UserProgress } from '../types';
 import { LANGUAGES } from '../constants';
 
-type LughaView = 'login' | 'language-selection' | 'dashboard' | 'lesson';
+type LughaView = 'login' | 'language-selection' | 'dashboard' | 'lesson' | 'dictionary';
 
 interface User {
     name: string;

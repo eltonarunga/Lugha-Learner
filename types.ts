@@ -1,4 +1,3 @@
-
 export interface Language {
   id: string;
   name: string;
@@ -42,9 +41,16 @@ export interface Level {
   lessons: Lesson[];
 }
 
+export interface DictionaryEntry {
+  word: string;
+  definition: string;
+  example?: string;
+}
+
 export interface LanguageData {
   name: string;
   levels: Level[];
+  dictionary?: DictionaryEntry[];
 }
 
 export interface UserProgress {

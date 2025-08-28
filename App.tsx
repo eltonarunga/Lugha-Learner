@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { LughaProvider, useLugha } from './hooks/useLugha';
 import LanguageSelector from './components/LanguageSelector';
 import Dashboard from './components/Dashboard';
 import LessonView from './components/LessonView';
 import Login from './components/Login'; // Import the new Login component
+import DictionaryView from './components/DictionaryView';
 
 const AppContent: React.FC = () => {
   const { view, selectedLanguage, activeLessonId, user } = useLugha();
@@ -21,6 +21,7 @@ const AppContent: React.FC = () => {
         {view === 'lesson' && selectedLanguage && activeLessonId !== null && (
           <LessonView language={selectedLanguage.id} lessonId={activeLessonId} />
         )}
+        {view === 'dictionary' && selectedLanguage && <DictionaryView />}
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { LESSON_DATA } from '../constants';
 import { useLugha } from '../hooks/useLugha';
@@ -102,7 +101,7 @@ const QuizFillInBlank: React.FC<{ question: Extract<QuizQuestion, { type: Questi
 
 
 const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language, lessonId }) => {
-  const { setView, setActiveLessonId, completeLesson, selectedLanguage } = useLugha();
+  const { setView, setActiveLessonId, completeLesson } = useLugha();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerState, setAnswerState] = useState<'unanswered' | 'correct' | 'incorrect'>('unanswered');
 
@@ -130,6 +129,11 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
     }
   };
 
+  const handleExit = () => {
+    setActiveLessonId(null);
+    setView('dashboard');
+  };
+
   const getFeedbackBgColor = () => {
       if (answerState === 'correct') return 'bg-green-100 border-green-500';
       if (answerState === 'incorrect') return 'bg-red-100 border-red-500';
@@ -139,7 +143,11 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
   return (
     <div className="flex flex-col h-[90vh]">
         <div className="flex items-center gap-4 mb-4">
-            <button onClick={() => setView('dashboard')} className="text-2xl text-slate-400 hover:text-slate-600">&times;</button>
+            <button onClick={handleExit} className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors" aria-label="Exit lesson">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
             <ProgressBar current={currentIndex} total={lesson.questions.length} />
         </div>
         
