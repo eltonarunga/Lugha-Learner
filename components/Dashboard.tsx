@@ -22,12 +22,12 @@ const LessonButton: React.FC<{ lesson: Lesson, isCompleted: boolean, isLocked: b
 
     const getButtonClasses = () => {
         if (isCompleted) {
-            return 'bg-green-500 hover:bg-green-600';
+            return 'bg-yellow-400 hover:bg-yellow-500'; // Gold for completed
         }
         if (isLocked) {
             return 'bg-slate-400 cursor-not-allowed';
         }
-        return `${baseColor} hover:bg-opacity-80`;
+        return `bg-white bg-opacity-20 hover:bg-opacity-40`;
     };
 
     return (
@@ -47,13 +47,13 @@ const LessonButton: React.FC<{ lesson: Lesson, isCompleted: boolean, isLocked: b
 };
 
 
-const LevelSection: React.FC<{ level: Level, languageId: string }> = ({ level, languageId }) => {
-    const { userProgress, setView, setActiveLessonId } = useLugha();
+const ModuleCard: React.FC<{ level: Level, languageId: string }> = ({ level, languageId }) => {
+    const { userProgress, setView, setActiveLessonId, selectedLanguage } = useLugha();
     const completedLessons = userProgress.completedLessons[languageId] || [];
+    const themeColor = selectedLanguage?.color || 'bg-gray-500';
 
     const handleLessonClick = (lesson: Lesson) => {
         if (lesson.questions.length === 0) {
-            // Mock completion for empty lessons
             alert("This lesson is under construction!");
             return;
         }
@@ -61,38 +61,44 @@ const LevelSection: React.FC<{ level: Level, languageId: string }> = ({ level, l
         setView('lesson');
     };
 
-    // Simple logic: unlock the next lesson after completing the previous one
-    const isLessonUnlocked = (lessonId: number, index: number) => {
-        if (index === 0) return true; // First lesson is always unlocked
+    const isLessonUnlocked = (index: number) => {
+        if (index === 0) return true;
         const previousLessonId = level.lessons[index - 1].id;
         return completedLessons.includes(previousLessonId);
     }
     
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-sm mb-6">
-            <h2 className="text-2xl font-extrabold text-slate-800 mb-2">{level.name}</h2>
-            <p className="text-slate-500 mb-6">{level.description}</p>
-            <div className="flex flex-wrap gap-6 justify-center">
-                {level.lessons.map((lesson, index) => {
-                    const isCompleted = completedLessons.includes(lesson.id);
-                    const isLocked = !isLessonUnlocked(lesson.id, index);
-                    return (
-                        <LessonButton
-                            key={lesson.id}
-                            lesson={lesson}
-                            isCompleted={isCompleted}
-                            isLocked={isLocked}
-                            onClick={() => handleLessonClick(lesson)}
-                        />
-                    );
-                })}
+        <div className="bg-white rounded-2xl shadow-sm mb-6 overflow-hidden">
+            <header className={`flex items-center space-x-4 p-6 text-white ${themeColor}`}>
+                <span className="text-5xl">{level.icon}</span>
+                <div className="flex-grow">
+                    <h2 className="text-2xl font-extrabold">{level.name}</h2>
+                    <p className="opacity-90">{level.description}</p>
+                </div>
+            </header>
+            <div className="p-6">
+                <div className="flex flex-wrap gap-6 justify-center">
+                    {level.lessons.map((lesson, index) => {
+                        const isCompleted = completedLessons.includes(lesson.id);
+                        const isLocked = !isLessonUnlocked(index);
+                        return (
+                            <LessonButton
+                                key={lesson.id}
+                                lesson={lesson}
+                                isCompleted={isCompleted}
+                                isLocked={isLocked}
+                                onClick={() => handleLessonClick(lesson)}
+                            />
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
 }
 
 const Dashboard: React.FC<{ language: Language }> = ({ language }) => {
-  const { userProgress, logout, setView } = useLugha();
+  const { userProgress, setView } = useLugha();
   const languageData = LESSON_DATA[language.id];
 
   if (!languageData) {
@@ -104,13 +110,14 @@ const Dashboard: React.FC<{ language: Language }> = ({ language }) => {
       <Header 
         xp={userProgress.xp} 
         streak={userProgress.streak}
-        onAvatarClick={logout}
+        onProfileClick={() => setView('profile')}
         onLanguageClick={() => setView('language-selection')}
         onDictionaryClick={() => setView('dictionary')}
+        onLeaderboardClick={() => setView('leaderboard')}
         language={{name: language.name, flag: language.flag}}
       />
       {languageData.levels.map(level => (
-        <LevelSection key={level.id} level={level} languageId={language.id}/>
+        <ModuleCard key={level.id} level={level} languageId={language.id}/>
       ))}
     </div>
   );

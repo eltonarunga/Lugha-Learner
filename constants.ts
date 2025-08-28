@@ -7,6 +7,19 @@ export const LANGUAGES: Language[] = [
   { id: 'kalenjin', name: 'Kalenjin', flag: '🇰🇪', color: 'bg-yellow-500' },
 ];
 
+export const LEADERBOARD_DATA = [
+  { name: 'Aisha', xp: 2540 },
+  { name: 'Baraka', xp: 2310 },
+  { name: 'Chep', xp: 2050 },
+  { name: 'David', xp: 1890 },
+  { name: 'Eshe', xp: 1720 },
+  { name: 'Faraji', xp: 1500 },
+  { name: 'Gitau', xp: 1280 },
+  { name: 'Habiba', xp: 1010 },
+  { name: 'Imani', xp: 850 },
+  { name: 'Jelani', xp: 620 },
+];
+
 export const LESSON_DATA: { [key: string]: LanguageData } = {
   swahili: {
     name: 'Swahili',
@@ -14,6 +27,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
       {
         id: 'swahili-beginner',
         name: 'Beginner',
+        icon: '👋',
         description: 'Start with the basics of Swahili.',
         lessons: [
           {
@@ -75,6 +89,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
        {
         id: 'swahili-intermediate',
         name: 'Intermediate',
+        icon: '🗣️',
         description: 'Build your vocabulary and grammar.',
         lessons: [
             { id: 4, title: 'Tenses', xp: 20, questions: [] },
@@ -94,6 +109,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
       {
         id: 'luo-beginner',
         name: 'Beginner',
+        icon: '👋',
         description: 'Start with the basics of Luo.',
         lessons: [
           {
@@ -157,6 +173,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
       {
         id: 'luo-vocab-a',
         name: 'Vocabulary Builder (A)',
+        icon: '📚',
         description: 'Learn common words from the dictionary.',
         lessons: [
           {
@@ -218,6 +235,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
       {
         id: 'kikuyu-beginner',
         name: 'Beginner',
+        icon: '👋',
         description: 'Start with the basics of Kikuyu.',
         lessons: [
           {
@@ -288,6 +306,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
       {
         id: 'kikuyu-vocab-ab',
         name: 'Vocabulary Builder (A-B)',
+        icon: '📚',
         description: 'Learn common words from the dictionary.',
         lessons: [
             {
@@ -382,6 +401,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
       {
         id: 'kalenjin-proverbs-1',
         name: 'Nandi Proverbs',
+        icon: '🦉',
         description: 'Learn wise sayings from the Nandi people.',
         lessons: [
           {

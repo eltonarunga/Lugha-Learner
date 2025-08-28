@@ -3,8 +3,10 @@ import { LughaProvider, useLugha } from './hooks/useLugha';
 import LanguageSelector from './components/LanguageSelector';
 import Dashboard from './components/Dashboard';
 import LessonView from './components/LessonView';
-import Login from './components/Login'; // Import the new Login component
+import Login from './components/Login';
 import DictionaryView from './components/DictionaryView';
+import Profile from './components/Profile';
+import Leaderboard from './components/Leaderboard';
 
 const AppContent: React.FC = () => {
   const { view, selectedLanguage, activeLessonId, user } = useLugha();
@@ -22,6 +24,8 @@ const AppContent: React.FC = () => {
           <LessonView language={selectedLanguage.id} lessonId={activeLessonId} />
         )}
         {view === 'dictionary' && selectedLanguage && <DictionaryView />}
+        {view === 'profile' && <Profile />}
+        {view === 'leaderboard' && <Leaderboard />}
       </div>
     </div>
   );

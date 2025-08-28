@@ -78,6 +78,7 @@ const QuizFillInBlank: React.FC<{ question: Extract<QuizQuestion, { type: Questi
               onChange={(e) => !submitted && setInput(e.target.value)}
               className="outline-none bg-transparent text-center font-bold text-blue-600 w-24"
               disabled={submitted}
+              autoFocus
             />
           </span>
           {question.questionParts[1]}
@@ -152,8 +153,8 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
         </div>
         
         <div className="flex-grow flex flex-col justify-center">
-            {currentQuestion.type === QuestionType.MCQ && <QuizMCQ question={currentQuestion} onAnswer={handleAnswer} />}
-            {currentQuestion.type === QuestionType.FILL_IN_BLANK && <QuizFillInBlank question={currentQuestion} onAnswer={handleAnswer} />}
+            {currentQuestion.type === QuestionType.MCQ && <QuizMCQ key={currentIndex} question={currentQuestion} onAnswer={handleAnswer} />}
+            {currentQuestion.type === QuestionType.FILL_IN_BLANK && <QuizFillInBlank key={currentIndex} question={currentQuestion} onAnswer={handleAnswer} />}
         </div>
         
         {answerState !== 'unanswered' && (

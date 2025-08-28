@@ -37,6 +37,7 @@ export interface Lesson {
 export interface Level {
   id: string;
   name: string;
+  icon: string;
   description: string;
   lessons: Lesson[];
 }
