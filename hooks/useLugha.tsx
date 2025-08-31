@@ -38,14 +38,13 @@ const initialProgress: UserProgress = {
 
 // Helper function to get item from localStorage
 const getStoredState = <T,>(key: string, defaultValue: T): T => {
-    const savedItem = localStorage.getItem(key);
-    if (savedItem) {
-        try {
+    try {
+        const savedItem = localStorage.getItem(key);
+        if (savedItem) {
             return JSON.parse(savedItem);
-        } catch (error) {
-            console.error(`Error parsing localStorage item ${key}:`, error);
-            return defaultValue;
         }
+    } catch (error) {
+        console.error(`Error parsing localStorage item ${key}:`, error);
     }
     return defaultValue;
 };

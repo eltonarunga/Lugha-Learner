@@ -1,35 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLugha } from '../hooks/useLugha';
-import { getDictionaryDefinition } from '../api';
+import { LESSON_DATA } from '../constants';
 import { DictionaryEntry } from '../types';
 
 const DictionaryView: React.FC = () => {
     const { selectedLanguage, setView } = useLugha();
     const [searchTerm, setSearchTerm] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [result, setResult] = useState<DictionaryEntry | null>(null);
 
-    const handleSearch = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!searchTerm || !selectedLanguage) return;
+    const dictionary = useMemo(() => {
+        if (!selectedLanguage) return [];
+        return LESSON_DATA[selectedLanguage.id]?.dictionary || [];
+    }, [selectedLanguage]);
 
-        setIsLoading(true);
-        setError(null);
-        setResult(null);
-
-        const definition = await getDictionaryDefinition(searchTerm, selectedLanguage.name);
-
-        setIsLoading(false);
-        if (definition) {
-            setResult({
-                word: searchTerm,
-                ...definition,
-            });
-        } else {
-            setError(`Could not find a definition for "${searchTerm}". Please try another word.`);
-        }
-    };
+    const filteredDictionary = useMemo(() => {
+        if (!searchTerm) return dictionary;
+        return dictionary.filter(entry =>
+            entry.word.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            entry.definition.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [searchTerm, dictionary]);
 
     if (!selectedLanguage) {
         return <div>No language selected.</div>;
@@ -52,42 +41,37 @@ const DictionaryView: React.FC = () => {
                 </h1>
             </div>
 
-            <form onSubmit={handleSearch} className="relative mb-6">
+            <div className="relative mb-6">
                  <input
                     type="text"
-                    placeholder="Enter a word..."
+                    placeholder="Search dictionary..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-4 pr-20 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                  />
-                 <button type="submit" disabled={isLoading || !searchTerm} className="absolute inset-y-0 right-0 px-4 m-1.5 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 disabled:bg-slate-400">
-                    {isLoading ? '...' : 'Search'}
-                 </button>
-            </form>
+                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                 </div>
+            </div>
             
             <div className="flex-grow overflow-y-auto pr-2">
-                {isLoading && (
+                {filteredDictionary.length > 0 ? (
+                    <ul className="space-y-4">
+                        {filteredDictionary.map((entry, index) => (
+                            <li key={index} className="bg-white p-4 rounded-lg shadow-sm">
+                                <h3 className="text-xl font-bold text-slate-800">{entry.word}</h3>
+                                <p className="text-slate-600 mt-1">{entry.definition}</p>
+                                {entry.example && (
+                                    <p className="text-sm text-slate-500 italic mt-2">e.g., "{entry.example}"</p>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
                     <div className="text-center py-10">
-                        <p className="text-slate-500">Looking up definition...</p>
-                    </div>
-                )}
-                {error && (
-                    <div className="text-center py-10">
-                        <p className="text-red-500">{error}</p>
-                    </div>
-                )}
-                {result && (
-                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h3 className="text-2xl font-bold text-slate-800 capitalize">{result.word}</h3>
-                        <p className="text-slate-700 mt-2 text-lg">{result.definition}</p>
-                        {result.example && (
-                            <p className="text-md text-slate-500 italic mt-4">e.g., "{result.example}"</p>
-                        )}
-                    </div>
-                )}
-                 {!isLoading && !error && !result && (
-                    <div className="text-center py-10">
-                        <p className="text-slate-500">Search for a word to see its definition.</p>
+                        <p className="text-slate-500">No entries found for "{searchTerm}".</p>
                     </div>
                 )}
             </div>
