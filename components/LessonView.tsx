@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { LESSON_DATA } from '../constants';
 import { useLugha } from '../hooks/useLugha';
-import { QuizQuestion, QuestionType, Lesson } from '../types';
+import { QuizQuestion, QuestionType } from '../types';
 import ProgressBar from './ProgressBar';
-import { generateLesson } from '../api';
 
 // Component for Multiple Choice Questions
 const QuizMCQ: React.FC<{ question: Extract<QuizQuestion, { type: QuestionType.MCQ }>, onAnswer: (correct: boolean) => void }> = ({ question, onAnswer }) => {
@@ -106,52 +105,24 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
   const { setView, setActiveLessonId, completeLesson } = useLugha();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerState, setAnswerState] = useState<'unanswered' | 'correct' | 'incorrect'>('unanswered');
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const staticLessonData = useMemo(() => {
+  const lesson = useMemo(() => {
     return LESSON_DATA[language]?.levels.flatMap(l => l.lessons).find(l => l.id === lessonId);
   }, [language, lessonId]);
 
-  useEffect(() => {
-    const fetchLesson = async () => {
-      if (!staticLessonData) {
-        setError("Lesson data not found.");
-        setIsLoading(false);
-        return;
-      }
+  if (!lesson) return <div>Lesson not found!</div>;
 
-      setIsLoading(true);
-      setError(null);
-
-      const generatedLesson = await generateLesson(language, staticLessonData.title);
-
-      if (generatedLesson) {
-        // Combine static data (like id, title, xp) with dynamic questions
-        setLesson({
-            ...staticLessonData,
-            questions: generatedLesson.questions
-        });
-      } else {
-        setError("Failed to generate the lesson. Please try again.");
-      }
-      setIsLoading(false);
-    };
-
-    fetchLesson();
-  }, [language, lessonId, staticLessonData]);
-
+  const currentQuestion = lesson.questions[currentIndex];
 
   const handleAnswer = (correct: boolean) => {
     setAnswerState(correct ? 'correct' : 'incorrect');
   };
 
   const handleContinue = () => {
-    if (lesson && currentIndex < lesson.questions.length - 1) {
+    if (currentIndex < lesson.questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setAnswerState('unanswered');
-    } else if (lesson) {
+    } else {
       // Lesson complete
       completeLesson(language, lessonId, lesson.xp);
       setActiveLessonId(null);
@@ -169,34 +140,6 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
       if (answerState === 'incorrect') return 'bg-red-100 border-red-500';
       return 'bg-transparent border-transparent';
   }
-
-  if (isLoading) {
-    return (
-        <div className="flex flex-col items-center justify-center h-[90vh]">
-            <h2 className="text-2xl font-bold text-slate-600">Generating your lesson...</h2>
-            <p className="text-slate-500">This may take a moment.</p>
-        </div>
-    );
-  }
-
-  if (error) {
-    return (
-        <div className="flex flex-col items-center justify-center h-[90vh] text-center">
-            <h2 className="text-2xl font-bold text-red-500">Error</h2>
-            <p className="text-slate-500 mb-4">{error}</p>
-            <button onClick={handleExit} className="bg-blue-500 text-white font-bold py-2 px-6 rounded-lg">
-                Back to Dashboard
-            </button>
-        </div>
-    );
-  }
-
-  if (!lesson) {
-    // This case should ideally not be reached if loading and error states are handled
-    return <div>Lesson not found!</div>;
-  }
-
-  const currentQuestion = lesson.questions[currentIndex];
 
   return (
     <div className="flex flex-col h-[90vh]">
