@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Language, UserProgress } from '../types';
 import { LANGUAGES } from '../constants';
 
@@ -36,24 +36,65 @@ const initialProgress: UserProgress = {
   streak: 0,
 };
 
+// Helper function to get item from localStorage
+const getStoredState = <T,>(key: string, defaultValue: T): T => {
+    const savedItem = localStorage.getItem(key);
+    if (savedItem) {
+        try {
+            return JSON.parse(savedItem);
+        } catch (error) {
+            console.error(`Error parsing localStorage item ${key}:`, error);
+            return defaultValue;
+        }
+    }
+    return defaultValue;
+};
+
+
 export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [view, setView] = useState<LughaView>('login');
-  const [user, setUser] = useState<User | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(null);
-  const [userProgress, setUserProgress] = useState<UserProgress>(initialProgress);
-  const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
+  const [user, setUser] = useState<User | null>(() => getStoredState('lugha-user', null));
+
+  const [view, setView] = useState<LughaView>(() => {
+      const savedUser = getStoredState<User | null>('lugha-user', null);
+      if (!savedUser) return 'login';
+      return getStoredState('lugha-view', 'language-selection');
+  });
+
+  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(() => getStoredState('lugha-selectedLanguage', null));
+  const [userProgress, setUserProgress] = useState<UserProgress>(() => getStoredState('lugha-userProgress', initialProgress));
+  const [activeLessonId, setActiveLessonId] = useState<number | null>(() => getStoredState('lugha-activeLessonId', null));
+
+  // Effect to synchronize state with localStorage
+  useEffect(() => {
+      if (user) {
+          localStorage.setItem('lugha-view', JSON.stringify(view));
+          localStorage.setItem('lugha-user', JSON.stringify(user));
+          localStorage.setItem('lugha-selectedLanguage', JSON.stringify(selectedLanguage));
+          localStorage.setItem('lugha-userProgress', JSON.stringify(userProgress));
+          localStorage.setItem('lugha-activeLessonId', JSON.stringify(activeLessonId));
+      } else {
+          // Clear localStorage on logout
+          localStorage.removeItem('lugha-view');
+          localStorage.removeItem('lugha-user');
+          localStorage.removeItem('lugha-selectedLanguage');
+          localStorage.removeItem('lugha-userProgress');
+          localStorage.removeItem('lugha-activeLessonId');
+      }
+  }, [view, user, selectedLanguage, userProgress, activeLessonId]);
+
 
   const loginAsGuest = () => {
-    setUser({ name: 'Guest', isGuest: true });
+    const guestUser = { name: 'Guest', isGuest: true };
+    setUser(guestUser);
     setView('language-selection');
   };
 
   const logout = () => {
       setUser(null);
+      setView('login');
       setSelectedLanguage(null);
       setUserProgress(initialProgress);
       setActiveLessonId(null);
-      setView('login');
   };
 
   const selectLanguage = (languageId: string) => {
