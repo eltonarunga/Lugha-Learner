@@ -59,3 +59,17 @@ export interface UserProgress {
   xp: number;
   streak: number;
 }
+
+export enum GoalType {
+  XP = 'XP',
+  LESSONS = 'LESSONS',
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  description: string;
+  type: GoalType;
+  target: number;
+  icon: string;
+}

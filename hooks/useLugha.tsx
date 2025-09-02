@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Language, UserProgress } from '../types';
 import { LANGUAGES } from '../constants';
 
-type LughaView = 'login' | 'language-selection' | 'dashboard' | 'lesson' | 'dictionary' | 'profile' | 'leaderboard';
+type LughaView = 'login' | 'language-selection' | 'dashboard' | 'lesson' | 'dictionary' | 'profile' | 'leaderboard' | 'goals';
 
 interface User {
     name: string;
@@ -21,6 +21,9 @@ interface LughaContextType {
   completeLesson: (languageId: string, lessonId: number, xp: number) => void;
   activeLessonId: number | null;
   setActiveLessonId: (id: number | null) => void;
+  activeGoalId: string | null;
+  setActiveGoalId: (id: string | null) => void;
+  dailyProgress: { xp: number; lessonsCompleted: number };
 }
 
 const LughaContext = createContext<LughaContextType | undefined>(undefined);
@@ -36,64 +39,29 @@ const initialProgress: UserProgress = {
   streak: 0,
 };
 
-// Helper function to get item from localStorage
-const getStoredState = <T,>(key: string, defaultValue: T): T => {
-    try {
-        const savedItem = localStorage.getItem(key);
-        if (savedItem) {
-            return JSON.parse(savedItem);
-        }
-    } catch (error) {
-        console.error(`Error parsing localStorage item ${key}:`, error);
-    }
-    return defaultValue;
-};
-
-
 export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => getStoredState('lugha-user', null));
-
-  const [view, setView] = useState<LughaView>(() => {
-      const savedUser = getStoredState<User | null>('lugha-user', null);
-      if (!savedUser) return 'login';
-      return getStoredState('lugha-view', 'language-selection');
-  });
-
-  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(() => getStoredState('lugha-selectedLanguage', null));
-  const [userProgress, setUserProgress] = useState<UserProgress>(() => getStoredState('lugha-userProgress', initialProgress));
-  const [activeLessonId, setActiveLessonId] = useState<number | null>(() => getStoredState('lugha-activeLessonId', null));
-
-  // Effect to synchronize state with localStorage
-  useEffect(() => {
-      if (user) {
-          localStorage.setItem('lugha-view', JSON.stringify(view));
-          localStorage.setItem('lugha-user', JSON.stringify(user));
-          localStorage.setItem('lugha-selectedLanguage', JSON.stringify(selectedLanguage));
-          localStorage.setItem('lugha-userProgress', JSON.stringify(userProgress));
-          localStorage.setItem('lugha-activeLessonId', JSON.stringify(activeLessonId));
-      } else {
-          // Clear localStorage on logout
-          localStorage.removeItem('lugha-view');
-          localStorage.removeItem('lugha-user');
-          localStorage.removeItem('lugha-selectedLanguage');
-          localStorage.removeItem('lugha-userProgress');
-          localStorage.removeItem('lugha-activeLessonId');
-      }
-  }, [view, user, selectedLanguage, userProgress, activeLessonId]);
+  const [view, setView] = useState<LughaView>('login');
+  const [user, setUser] = useState<User | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(null);
+  const [userProgress, setUserProgress] = useState<UserProgress>(initialProgress);
+  const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
+  const [activeGoalId, setActiveGoalId] = useState<string | null>(null);
+  const [dailyProgress, setDailyProgress] = useState({ xp: 0, lessonsCompleted: 0 });
 
 
   const loginAsGuest = () => {
-    const guestUser = { name: 'Guest', isGuest: true };
-    setUser(guestUser);
+    setUser({ name: 'Guest', isGuest: true });
     setView('language-selection');
   };
 
   const logout = () => {
       setUser(null);
-      setView('login');
       setSelectedLanguage(null);
       setUserProgress(initialProgress);
       setActiveLessonId(null);
+      setActiveGoalId(null);
+      setDailyProgress({ xp: 0, lessonsCompleted: 0 });
+      setView('login');
   };
 
   const selectLanguage = (languageId: string) => {
@@ -121,6 +89,10 @@ export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         },
       };
     });
+    setDailyProgress(prev => ({
+        xp: prev.xp + xp,
+        lessonsCompleted: prev.lessonsCompleted + 1,
+    }));
   };
 
   const value = {
@@ -135,6 +107,9 @@ export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     completeLesson,
     activeLessonId,
     setActiveLessonId,
+    activeGoalId,
+    setActiveGoalId,
+    dailyProgress,
   };
 
   return <LughaContext.Provider value={value}>{children}</LughaContext.Provider>;

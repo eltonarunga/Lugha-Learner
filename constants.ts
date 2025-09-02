@@ -1,10 +1,17 @@
-import { Language, LanguageData, QuestionType } from './types';
+import { Language, LanguageData, QuestionType, Goal, GoalType } from './types';
 
 export const LANGUAGES: Language[] = [
   { id: 'swahili', name: 'Swahili', flag: '🇰🇪', color: 'bg-green-500' },
   { id: 'luo', name: 'Luo', flag: '🇰🇪', color: 'bg-blue-500' },
   { id: 'kikuyu', name: 'Kikuyu', flag: '🇰🇪', color: 'bg-red-500' },
   { id: 'kalenjin', name: 'Kalenjin', flag: '🇰🇪', color: 'bg-yellow-500' },
+];
+
+export const DAILY_GOALS: Goal[] = [
+  { id: 'xp-20', title: 'Casual', description: 'Earn 20 XP', type: GoalType.XP, target: 20, icon: '☕️' },
+  { id: 'xp-50', title: 'Regular', description: 'Earn 50 XP', type: GoalType.XP, target: 50, icon: '🏃‍♂️' },
+  { id: 'lessons-1', title: 'Focused', description: 'Complete 1 lesson', type: GoalType.LESSONS, target: 1, icon: '🎯' },
+  { id: 'lessons-3', title: 'Intense', description: 'Complete 3 lessons', type: GoalType.LESSONS, target: 3, icon: '🔥' },
 ];
 
 export const LEADERBOARD_DATA = [
@@ -44,7 +51,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
               },
               {
                 type: QuestionType.FILL_IN_BLANK,
-                questionParts: ['Habari ____?', ' Gani'],
+                questionParts: ['Habari ', '?'],
                 answer: 'gani',
                 translation: '"Habari gani?" means "How are you?".',
               },
@@ -183,7 +190,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
             questions: [
               {
                 type: QuestionType.FILL_IN_BLANK,
-                questionParts: ["Gibang'o kuon ______.", ""],
+                questionParts: ["Gibang'o kuon ", "."],
                 answer: "abang'a",
                 translation: "They are eating plain mush. \"Abang'a\" means dry or plain."
               },
@@ -196,7 +203,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
               },
               {
                 type: QuestionType.FILL_IN_BLANK,
-                questionParts: ["Ne giloso wang'yo ______.", ""],
+                questionParts: ["Ne giloso wang'yo ", "."],
                 answer: "abidha",
                 translation: "They fixed the road well. \"Abidha\" means very well or well done."
               },
@@ -337,7 +344,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
                     },
                     {
                         type: QuestionType.FILL_IN_BLANK,
-                        questionParts: ["To add to something is to ____.", ""],
+                        questionParts: ["To add to something is to ", "."],
                         answer: 'kotara',
                         translation: 'Kotara means "to add to" or "to count".'
                     }
@@ -364,7 +371,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
                     },
                     {
                         type: QuestionType.FILL_IN_BLANK,
-                        questionParts: ["A banana is called an ____.", ""],
+                        questionParts: ["A banana is called an ", "."],
                         answer: 'irigo',
                         translation: 'Irigo is the Kikuyu word for banana.'
                     },
@@ -418,7 +425,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
               },
               {
                 type: QuestionType.FILL_IN_BLANK,
-                questionParts: ["Makikerchin kirukik aeng' eng biy ______.", ""],
+                questionParts: ["Makikerchin kirukik aeng' eng biy ", "."],
                 answer: "akenge",
                 translation: '"The bulls cannot stay in the same cowshed." This implies two leaders cannot rule together.'
               },
@@ -438,7 +445,7 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
               },
                {
                 type: QuestionType.FILL_IN_BLANK,
-                questionParts: ["Kerichot ab mat ko ____.", ""],
+                questionParts: ["Kerichot ab mat ko ", "."],
                 answer: 'mat',
                 translation: '"The medicine of fire is fire." This teaches to use bold action for tough situations.'
               }

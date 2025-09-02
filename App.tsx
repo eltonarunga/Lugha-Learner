@@ -7,6 +7,7 @@ import Login from './components/Login';
 import DictionaryView from './components/DictionaryView';
 import Profile from './components/Profile';
 import Leaderboard from './components/Leaderboard';
+import DailyGoals from './components/DailyGoals';
 
 const AppContent: React.FC = () => {
   const { view, selectedLanguage, activeLessonId, user } = useLugha();
@@ -26,6 +27,7 @@ const AppContent: React.FC = () => {
         {view === 'dictionary' && selectedLanguage && <DictionaryView />}
         {view === 'profile' && <Profile />}
         {view === 'leaderboard' && <Leaderboard />}
+        {view === 'goals' && <DailyGoals />}
       </div>
     </div>
   );

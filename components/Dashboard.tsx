@@ -114,6 +114,7 @@ const Dashboard: React.FC<{ language: Language }> = ({ language }) => {
         onLanguageClick={() => setView('language-selection')}
         onDictionaryClick={() => setView('dictionary')}
         onLeaderboardClick={() => setView('leaderboard')}
+        onGoalsClick={() => setView('goals')}
         language={{name: language.name, flag: language.flag}}
       />
       {languageData.levels.map(level => (

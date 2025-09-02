@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { LESSON_DATA } from '../constants';
 import { useLugha } from '../hooks/useLugha';
 import { QuizQuestion, QuestionType } from '../types';
@@ -109,16 +109,9 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
   const lesson = useMemo(() => {
     return LESSON_DATA[language]?.levels.flatMap(l => l.lessons).find(l => l.id === lessonId);
   }, [language, lessonId]);
-
-  if (!lesson) return <div>Lesson not found!</div>;
-
-  const currentQuestion = lesson.questions[currentIndex];
-
-  const handleAnswer = (correct: boolean) => {
-    setAnswerState(correct ? 'correct' : 'incorrect');
-  };
-
+  
   const handleContinue = () => {
+    if (!lesson) return;
     if (currentIndex < lesson.questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setAnswerState('unanswered');
@@ -128,6 +121,25 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
       setActiveLessonId(null);
       setView('dashboard');
     }
+  };
+
+  useEffect(() => {
+    if (answerState === 'correct') {
+      const timer = setTimeout(() => {
+        handleContinue();
+      }, 1500); // Autocontinue after 1.5s on correct answer
+
+      return () => clearTimeout(timer); // Cleanup timer on component unmount or state change
+    }
+  }, [answerState, currentIndex]);
+
+
+  if (!lesson) return <div>Lesson not found!</div>;
+
+  const currentQuestion = lesson.questions[currentIndex];
+
+  const handleAnswer = (correct: boolean) => {
+    setAnswerState(correct ? 'correct' : 'incorrect');
   };
 
   const handleExit = () => {
@@ -166,9 +178,11 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
                         </h3>
                         <p className="text-slate-600">{currentQuestion.translation}</p>
                     </div>
-                    <button onClick={handleContinue} className={`px-8 py-3 rounded-lg text-white font-bold shadow-md transition-colors ${answerState === 'correct' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}`}>
-                        Continue
-                    </button>
+                    {answerState === 'incorrect' && (
+                         <button onClick={handleContinue} className="px-8 py-3 rounded-lg text-white font-bold shadow-md transition-colors bg-red-500 hover:bg-red-600">
+                            Continue
+                        </button>
+                    )}
                </div>
             </div>
         )}

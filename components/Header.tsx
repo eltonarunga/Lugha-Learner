@@ -7,6 +7,7 @@ interface HeaderProps {
     onLanguageClick: () => void;
     onDictionaryClick: () => void;
     onLeaderboardClick: () => void;
+    onGoalsClick: () => void;
     language: {
         name: string;
         flag: string;
@@ -29,7 +30,7 @@ const StatItem: React.FC<{icon: React.ReactNode, value: number, color: string}> 
 );
 
 
-const Header: React.FC<HeaderProps> = ({ xp, streak, onProfileClick, onLanguageClick, language, onDictionaryClick, onLeaderboardClick }) => {
+const Header: React.FC<HeaderProps> = ({ xp, streak, onProfileClick, onLanguageClick, language, onDictionaryClick, onLeaderboardClick, onGoalsClick }) => {
   return (
     <header className="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm mb-6">
       <button onClick={onLanguageClick} className="flex items-center space-x-3 rounded-lg p-2 -ml-2 hover:bg-slate-100 transition-colors duration-200" aria-label="Switch language">
@@ -52,6 +53,12 @@ const Header: React.FC<HeaderProps> = ({ xp, streak, onProfileClick, onLanguageC
           value={streak}
           color="text-orange-500"
         />
+        <button onClick={onGoalsClick} className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-2xl shadow-sm transform hover:scale-105 hover:bg-slate-300 transition-all duration-300" aria-label="Open Daily Goals">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </button>
         <button onClick={onLeaderboardClick} className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-2xl shadow-sm transform hover:scale-105 hover:bg-slate-300 transition-all duration-300" aria-label="Open Leaderboard">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l7-3v13M9 19c-3 0-5.5-2.5-5.5-5.5S6 8 9 8s5.5 2.5 5.5 5.5S12 19 9 19z" />
