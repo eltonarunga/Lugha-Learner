@@ -13,6 +13,7 @@ interface LughaContextType {
   view: LughaView;
   setView: (view: LughaView) => void;
   user: User | null;
+  login: (name: string) => void;
   loginAsGuest: () => void;
   logout: () => void;
   selectedLanguage: Language | null;
@@ -48,6 +49,10 @@ export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [activeGoalId, setActiveGoalId] = useState<string | null>(null);
   const [dailyProgress, setDailyProgress] = useState({ xp: 0, lessonsCompleted: 0 });
 
+  const login = (name: string) => {
+    setUser({ name, isGuest: false });
+    setView('language-selection');
+  };
 
   const loginAsGuest = () => {
     setUser({ name: 'Guest', isGuest: true });
@@ -99,6 +104,7 @@ export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     view,
     setView,
     user,
+    login,
     loginAsGuest,
     logout,
     selectedLanguage,

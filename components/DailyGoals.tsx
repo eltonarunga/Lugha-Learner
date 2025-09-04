@@ -5,27 +5,29 @@ import { Goal, GoalType } from '../types';
 import ProgressBar from './ProgressBar';
 
 const PageHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
-    <div className="flex items-center justify-center mb-6 relative">
+    <div className="flex items-center mb-6 relative">
         <button onClick={onBack} className="absolute left-0 p-2 rounded-full hover:bg-slate-200 transition-colors" aria-label="Back">
-             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
         </button>
-        <h1 className="text-3xl font-extrabold text-slate-800">{title}</h1>
+        <h1 className="flex-grow text-center text-3xl font-extrabold text-slate-800 tracking-tight">{title}</h1>
     </div>
 );
 
 const GoalCard: React.FC<{ goal: Goal; isSelected: boolean; onSelect: () => void }> = ({ goal, isSelected, onSelect }) => {
     const language = useLugha().selectedLanguage;
-    const themeColor = language?.color.replace('bg-', 'border-') || 'border-blue-500';
+    const color = language?.color.match(/bg-(\w+)-(\d+)/);
+    const themeColorName = color ? color[1] : 'blue';
+    const themeColor = `border-${themeColorName}-500`;
 
     return (
         <button
             onClick={onSelect}
-            className={`w-full p-6 bg-white rounded-2xl shadow-sm text-left transition-all duration-300 ${isSelected ? `border-4 ${themeColor}` : 'border-4 border-transparent hover:border-slate-300'}`}
+            className={`w-full p-5 bg-white rounded-2xl shadow-sm text-left transition-all duration-300 border-2 ${isSelected ? `${themeColor} bg-${themeColorName}-50` : 'border-slate-200/80 hover:border-slate-300 hover:bg-slate-50'}`}
         >
             <div className="flex items-center">
-                <span className="text-4xl mr-4">{goal.icon}</span>
+                <span className="text-4xl mr-5">{goal.icon}</span>
                 <div>
                     <h3 className="text-xl font-bold text-slate-800">{goal.title}</h3>
                     <p className="text-slate-600">{goal.description}</p>
@@ -59,11 +61,11 @@ const DailyGoals: React.FC = () => {
     const isGoalCompleted = activeGoal && currentProgress >= goalTarget;
 
     return (
-        <div className="p-4">
+        <div className="p-1">
             <PageHeader title="Daily Goals" onBack={() => setView('dashboard')} />
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm mb-8">
-                <h2 className="text-xl font-bold text-slate-700 mb-2">Current Progress</h2>
+            <div className="bg-white p-6 rounded-2xl shadow-sm mb-8 border border-slate-200/80">
+                <h2 className="text-xl font-bold text-slate-800 mb-2">Current Progress</h2>
                 {isGoalCompleted ? (
                     <div className="text-center py-4">
                         <span className="text-5xl">🎉</span>
@@ -78,7 +80,7 @@ const DailyGoals: React.FC = () => {
             </div>
 
             <div>
-                <h2 className="text-xl font-bold text-slate-700 mb-4">Set Your Goal</h2>
+                <h2 className="text-xl font-bold text-slate-800 mb-4">Set Your Goal</h2>
                 <div className="space-y-4">
                     {DAILY_GOALS.map(goal => (
                         <GoalCard 

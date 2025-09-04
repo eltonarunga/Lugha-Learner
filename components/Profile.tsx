@@ -3,21 +3,21 @@ import { useLugha } from '../hooks/useLugha';
 import { LESSON_DATA } from '../constants';
 
 const PageHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
-    <div className="flex items-center justify-center mb-6 relative">
+    <div className="flex items-center mb-6 relative">
         <button onClick={onBack} className="absolute left-0 p-2 rounded-full hover:bg-slate-200 transition-colors" aria-label="Back">
-             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
         </button>
-        <h1 className="text-3xl font-extrabold text-slate-800">{title}</h1>
+        <h1 className="flex-grow text-center text-3xl font-extrabold text-slate-800 tracking-tight">{title}</h1>
     </div>
 );
 
 const StatCard: React.FC<{ label: string; value: string | number; icon: React.ReactNode }> = ({ label, value, icon }) => (
-    <div className="bg-white p-6 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center">
+    <div className="bg-white p-6 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center border border-slate-200/80">
         <div className="text-4xl mb-2">{icon}</div>
-        <div className="text-3xl font-bold text-slate-700">{value}</div>
-        <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{label}</div>
+        <div className="text-3xl font-bold text-slate-800">{value}</div>
+        <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider mt-1">{label}</div>
     </div>
 );
 
@@ -29,17 +29,17 @@ const Profile: React.FC = () => {
     const completionPercentage = totalLessons > 0 ? Math.round((lessonsCompleted / totalLessons) * 100) : 0;
 
     return (
-        <div className="p-4">
+        <div className="p-1">
             <PageHeader title="Profile" onBack={() => setView('dashboard')} />
 
-            <div className="flex flex-col items-center mb-8">
-                 <div className="w-24 h-24 bg-slate-200 rounded-full flex items-center justify-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex flex-col items-center my-8">
+                 <div className="w-28 h-28 bg-slate-200 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                  </div>
-                 <h2 className="text-2xl font-bold">{user?.name}</h2>
-                 <p className="text-slate-500">{selectedLanguage?.name} Learner</p>
+                 <h2 className="text-3xl font-bold tracking-tight">{user?.name}</h2>
+                 <p className="text-slate-500 font-medium">{selectedLanguage?.name} Learner</p>
             </div>
             
             <div className="grid grid-cols-2 gap-4 mb-8">
@@ -47,23 +47,23 @@ const Profile: React.FC = () => {
                 <StatCard label="Streak" value={`${userProgress.streak} Days`} icon={'🔥'} />
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-sm mb-8">
-                 <h3 className="text-lg font-bold text-slate-700 mb-2">Course Progress</h3>
+            <div className="bg-white p-6 rounded-2xl shadow-sm mb-8 border border-slate-200/80">
+                 <h3 className="text-lg font-bold text-slate-800 mb-2">Course Progress</h3>
                  <p className="text-slate-500 mb-4">{`You've completed ${lessonsCompleted} of ${totalLessons} lessons.`}</p>
-                 <div className="w-full bg-slate-200 rounded-full h-4">
-                    <div className="bg-green-500 h-4 rounded-full" style={{ width: `${completionPercentage}%` }}></div>
+                 <div className="w-full bg-slate-200 rounded-full h-4 border border-slate-300">
+                    <div className="bg-green-500 h-full rounded-full" style={{ width: `${completionPercentage}%` }}></div>
                  </div>
             </div>
 
             <button
                 onClick={logout}
-                className="w-full flex items-center justify-center py-3 px-4 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition-colors duration-300"
+                className="w-full flex items-center justify-center py-3 px-4 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition-all duration-300 transform hover:scale-[1.02]"
                 aria-label="Logout"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span className="font-semibold">Logout</span>
+                <span className="font-semibold text-lg">Logout</span>
             </button>
         </div>
     );

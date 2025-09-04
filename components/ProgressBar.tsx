@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ProgressBarProps {
@@ -10,9 +9,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ current, total }) => {
   const percentage = total > 0 ? (current / total) * 100 : 0;
 
   return (
-    <div className="w-full bg-slate-200 rounded-full h-4">
+    <div className="w-full bg-slate-200 rounded-full h-5 relative overflow-hidden border border-slate-300">
       <div
-        className="bg-green-500 h-4 rounded-full transition-all duration-500 ease-out"
+        className="bg-green-500 h-full rounded-full transition-all duration-500 ease-out"
         style={{ width: `${percentage}%` }}
       ></div>
     </div>

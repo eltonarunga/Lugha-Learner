@@ -17,8 +17,8 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800">
-      <div className="container mx-auto max-w-lg p-4">
+    <div className="min-h-screen text-slate-800">
+      <div className="container mx-auto max-w-xl p-4 sm:p-6">
         {view === 'language-selection' && <LanguageSelector />}
         {view === 'dashboard' && selectedLanguage && <Dashboard language={selectedLanguage} />}
         {view === 'lesson' && selectedLanguage && activeLessonId !== null && (
