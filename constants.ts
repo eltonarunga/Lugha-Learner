@@ -99,7 +99,22 @@ export const LESSON_DATA: { [key: string]: LanguageData } = {
         icon: '🗣️',
         description: 'Build your vocabulary and grammar.',
         lessons: [
-            { id: 4, title: 'Tenses', xp: 20, questions: [] },
+            { 
+              id: 4, 
+              title: 'Epic Adventure', 
+              xp: 25, 
+              questions: [
+                {
+                  type: QuestionType.EPIC_ADVENTURE,
+                  title: 'The Clever Sungura',
+                  prompt: `You are a masterful storyteller for language learners. Create a short, engaging adventure story for a beginner Swahili learner. The story is about a clever rabbit ("sungura") who outsmarts a big lion ("simba").
+The story must be simple and mostly in English, but introduce and repeat the Swahili words "sungura" (rabbit) and "simba" (lion) multiple times in a natural way.
+Keep the story to about 4-5 paragraphs.
+After the story, create a simple multiple-choice question in English about the story to check comprehension.`,
+                  translation: "An interactive story to test your skills."
+                }
+              ] 
+            },
             { id: 5, title: 'Shopping', xp: 20, questions: [] },
         ]
       }

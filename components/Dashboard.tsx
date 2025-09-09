@@ -105,6 +105,34 @@ const ModuleCard: React.FC<{ level: Level, languageId: string }> = ({ level, lan
     );
 }
 
+const ExploreCard: React.FC<{ icon: string; title: string; description: string; onClick: () => void; color: 'green' | 'blue' | 'purple' | 'slate'; }> = ({ icon, title, description, onClick, color }) => {
+    const themes = {
+        green: 'from-green-400 to-emerald-500',
+        blue: 'from-blue-400 to-sky-500',
+        purple: 'from-purple-400 to-indigo-500',
+        slate: 'from-slate-400 to-slate-500',
+    };
+    const theme = themes[color] || themes.slate;
+
+    return (
+        <button onClick={onClick} className={`w-full text-left p-6 rounded-2xl text-white shadow-lg transform hover:-translate-y-1 transition-all duration-300 bg-gradient-to-br ${theme}`}>
+            <div className="flex items-start">
+                <span className="text-4xl mr-5 drop-shadow-sm">{icon}</span>
+                <div className="flex-grow">
+                    <h3 className="text-xl font-bold tracking-tight">{title}</h3>
+                    <p className="text-sm opacity-90 mt-1">{description}</p>
+                </div>
+                <div className="ml-auto flex-shrink-0 self-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </div>
+        </button>
+    );
+};
+
+
 const Dashboard: React.FC<{ language: Language }> = ({ language }) => {
   const { userProgress, setView } = useLugha();
   const languageData = LESSON_DATA[language.id];
@@ -128,6 +156,33 @@ const Dashboard: React.FC<{ language: Language }> = ({ language }) => {
       {languageData.levels.map(level => (
         <ModuleCard key={level.id} level={level} languageId={language.id}/>
       ))}
+
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-slate-700 mb-4 px-1 tracking-tight">AI-Powered Tools</h2>
+        <div className="space-y-4">
+            <ExploreCard
+                icon="🐸"
+                title="Adventure Mode"
+                description="Upload a character and dive into a story!"
+                onClick={() => setView('adventure')}
+                color="green"
+            />
+            <ExploreCard
+                icon="📸"
+                title="Visual Vocabulary"
+                description="Learn words by taking pictures of objects."
+                onClick={() => setView('visual-vocab')}
+                color="blue"
+            />
+            <ExploreCard
+                icon="💬"
+                title="Conversation Tutor"
+                description="Practice your skills with an AI tutor."
+                onClick={() => setView('conversation')}
+                color="purple"
+            />
+        </div>
+      </div>
     </div>
   );
 };

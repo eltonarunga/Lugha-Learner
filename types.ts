@@ -8,6 +8,7 @@ export interface Language {
 export enum QuestionType {
   MCQ = 'MCQ',
   FILL_IN_BLANK = 'FILL_IN_BLANK',
+  EPIC_ADVENTURE = 'EPIC_ADVENTURE',
 }
 
 export interface MCQQuestion {
@@ -25,7 +26,14 @@ export interface FillInBlankQuestion {
   translation: string;
 }
 
-export type QuizQuestion = MCQQuestion | FillInBlankQuestion;
+export interface EpicAdventureQuestion {
+  type: QuestionType.EPIC_ADVENTURE;
+  title: string;
+  prompt: string;
+  translation: string;
+}
+
+export type QuizQuestion = MCQQuestion | FillInBlankQuestion | EpicAdventureQuestion;
 
 export interface Lesson {
   id: number;

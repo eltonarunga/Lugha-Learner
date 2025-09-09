@@ -8,6 +8,9 @@ import DictionaryView from './components/DictionaryView';
 import Profile from './components/Profile';
 import Leaderboard from './components/Leaderboard';
 import DailyGoals from './components/DailyGoals';
+import AdventureMode from './components/AdventureMode';
+import VisualVocabulary from './components/VisualVocabulary';
+import ConversationTutor from './components/ConversationTutor';
 
 const AppContent: React.FC = () => {
   const { view, selectedLanguage, activeLessonId, user } = useLugha();
@@ -28,6 +31,9 @@ const AppContent: React.FC = () => {
         {view === 'profile' && <Profile />}
         {view === 'leaderboard' && <Leaderboard />}
         {view === 'goals' && <DailyGoals />}
+        {view === 'adventure' && selectedLanguage && <AdventureMode />}
+        {view === 'visual-vocab' && selectedLanguage && <VisualVocabulary />}
+        {view === 'conversation' && selectedLanguage && <ConversationTutor />}
       </div>
     </div>
   );
