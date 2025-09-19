@@ -81,19 +81,49 @@ export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setUserProgress(prev => {
       const currentCompleted = prev.completedLessons[languageId] || [];
       if (currentCompleted.includes(lessonId)) {
-        return prev; // Already completed
+        return prev; // Lesson already completed, no change in progress.
       }
+
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      
+      const lastDateStr = prev.lastCompletionDate;
+
+      // If a lesson was already completed today, just add XP and the lesson.
+      if (lastDateStr === todayStr) {
+        return {
+          ...prev,
+          xp: prev.xp + xp,
+          completedLessons: {
+            ...prev.completedLessons,
+            [languageId]: [...currentCompleted, lessonId],
+          },
+        };
+      }
+
+      // It's a new day of activity.
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+      const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      let newStreak = 1; // Default to 1 for a new session. Also handles first-ever lesson.
+      if (lastDateStr === yesterdayStr) {
+        // If the last activity was yesterday, increment the streak.
+        newStreak = prev.streak + 1;
+      }
+      
       return {
         ...prev,
         xp: prev.xp + xp,
-        // Basic streak logic, can be improved with date checks
-        streak: prev.streak + 1,
+        streak: newStreak,
+        lastCompletionDate: todayStr,
         completedLessons: {
           ...prev.completedLessons,
           [languageId]: [...currentCompleted, lessonId],
         },
       };
     });
+
     setDailyProgress(prev => ({
         xp: prev.xp + xp,
         lessonsCompleted: prev.lessonsCompleted + 1,

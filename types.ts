@@ -66,6 +66,7 @@ export interface UserProgress {
   completedLessons: { [languageId: string]: number[] };
   xp: number;
   streak: number;
+  lastCompletionDate?: string;
 }
 
 export enum GoalType {

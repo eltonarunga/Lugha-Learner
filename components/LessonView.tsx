@@ -17,9 +17,15 @@ const CrossIcon = () => (
   </svg>
 );
 
+interface AnswerPayload {
+  correct: boolean;
+  userAnswer: string;
+  correctAnswer: string;
+  questionText: string;
+}
 
 // Component for Multiple Choice Questions
-const QuizMCQ: React.FC<{ question: Extract<QuizQuestion, { type: QuestionType.MCQ }>, onAnswer: (correct: boolean) => void }> = ({ question, onAnswer }) => {
+const QuizMCQ: React.FC<{ question: Extract<QuizQuestion, { type: QuestionType.MCQ }>, onAnswer: (payload: AnswerPayload) => void }> = ({ question, onAnswer }) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
@@ -31,7 +37,12 @@ const QuizMCQ: React.FC<{ question: Extract<QuizQuestion, { type: QuestionType.M
   const handleSubmit = () => {
     if (!selected) return;
     setSubmitted(true);
-    onAnswer(selected === question.answer);
+    onAnswer({
+      correct: selected === question.answer,
+      userAnswer: selected,
+      correctAnswer: question.answer,
+      questionText: question.question,
+    });
   };
 
   const getButtonClass = (option: string) => {
@@ -88,7 +99,7 @@ const QuizMCQ: React.FC<{ question: Extract<QuizQuestion, { type: QuestionType.M
 };
 
 // Component for Fill-in-the-Blank Questions
-const QuizFillInBlank: React.FC<{ question: Extract<QuizQuestion, { type: QuestionType.FILL_IN_BLANK }>, onAnswer: (correct: boolean) => void }> = ({ question, onAnswer }) => {
+const QuizFillInBlank: React.FC<{ question: Extract<QuizQuestion, { type: QuestionType.FILL_IN_BLANK }>, onAnswer: (payload: AnswerPayload) => void }> = ({ question, onAnswer }) => {
   const [input, setInput] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -96,7 +107,12 @@ const QuizFillInBlank: React.FC<{ question: Extract<QuizQuestion, { type: Questi
     e.preventDefault();
     if (submitted || !input) return;
     setSubmitted(true);
-    onAnswer(input.trim().toLowerCase() === question.answer.toLowerCase());
+    onAnswer({
+      correct: input.trim().toLowerCase() === question.answer.toLowerCase(),
+      userAnswer: input.trim(),
+      correctAnswer: question.answer,
+      questionText: `${question.questionParts[0]} ___ ${question.questionParts[1]}`,
+    });
   };
 
   const isCorrect = input.trim().toLowerCase() === question.answer.toLowerCase();
@@ -132,7 +148,7 @@ const QuizFillInBlank: React.FC<{ question: Extract<QuizQuestion, { type: Questi
   );
 };
 
-const EpicAdventure: React.FC<{ question: Extract<QuizQuestion, { type: QuestionType.EPIC_ADVENTURE }>, onAnswer: (correct: boolean) => void }> = ({ question, onAnswer }) => {
+const EpicAdventure: React.FC<{ question: Extract<QuizQuestion, { type: QuestionType.EPIC_ADVENTURE }>, onAnswer: (payload: AnswerPayload) => void }> = ({ question, onAnswer }) => {
   const [storyData, setStoryData] = useState<{ story: string; question: string; options: string[]; answer: string; } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -188,7 +204,12 @@ const EpicAdventure: React.FC<{ question: Extract<QuizQuestion, { type: Question
   const handleSubmit = () => {
     if (!selected || !storyData) return;
     setSubmitted(true);
-    onAnswer(selected === storyData.answer);
+    onAnswer({
+      correct: selected === storyData.answer,
+      userAnswer: selected,
+      correctAnswer: storyData.answer,
+      questionText: storyData.question,
+    });
   };
 
   if (loading) {
@@ -276,6 +297,10 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerState, setAnswerState] = useState<'unanswered' | 'correct' | 'incorrect'>('unanswered');
   const [showFeedback, setShowFeedback] = useState(false);
+  const [correctAnswer, setCorrectAnswer] = useState<string | null>(null);
+  const [explanation, setExplanation] = useState<string>('');
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+
 
   const lesson = useMemo(() => {
     return LESSON_DATA[language]?.levels.flatMap(l => l.lessons).find(l => l.id === lessonId);
@@ -313,8 +338,37 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
 
   const currentQuestion = lesson.questions[currentIndex];
 
-  const handleAnswer = (correct: boolean) => {
+  const handleAnswer = async ({ correct, userAnswer, correctAnswer, questionText }: AnswerPayload) => {
     setAnswerState(correct ? 'correct' : 'incorrect');
+    setCorrectAnswer(correctAnswer);
+    setExplanation('');
+    setIsGenerating(false);
+
+    if (!correct) {
+      setIsGenerating(true);
+      try {
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+        const prompt = `A language learner was answering a quiz question.
+        Question: "${questionText}"
+        Their incorrect answer: "${userAnswer}"
+        The correct answer: "${correctAnswer}"
+        
+        Provide a very short, simple, and encouraging explanation (1-2 sentences) for why their answer was incorrect.
+        For example: "Close! 'kwaheri' means 'goodbye'. The correct word for 'hello' is 'jambo'."
+        or "Good try! You used the right verb, but the conjugation was for a different tense."`;
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+        });
+        setExplanation(response.text.trim());
+      } catch (err) {
+        console.error("Failed to generate explanation:", err);
+        setExplanation("Keep practicing! Every mistake is a learning opportunity.");
+      } finally {
+        setIsGenerating(false);
+      }
+    }
   };
 
   const handleExit = () => {
@@ -348,14 +402,54 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
         
         <div className={`fixed bottom-0 left-0 right-0 w-full transition-transform duration-300 ease-in-out ${showFeedback ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className={`p-6 shadow-2xl-top rounded-t-2xl ${feedbackBgColor}`}>
-               <div className="max-w-xl mx-auto flex justify-between items-center">
-                    <div>
+               <div className="max-w-xl mx-auto flex justify-between items-start gap-4">
+                    <div className="flex-grow">
                         <h3 className={`font-bold text-2xl ${feedbackTextColor}`}>
                             {feedbackTitle}
                         </h3>
-                        {answerState !== 'unanswered' && <p className="text-slate-700 mt-1 font-medium">{currentQuestion.translation}</p>}
+                         {answerState === 'correct' && (
+                            <p className="text-slate-700 mt-1 font-medium">{currentQuestion.translation}</p>
+                        )}
+                        {answerState === 'incorrect' && (
+                            <div className="mt-3 space-y-3">
+                                <div className="bg-white/60 p-4 rounded-xl border border-slate-300/50">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex-shrink-0 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mt-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-slate-700">Correct Answer</h4>
+                                            <p className="font-bold text-slate-800 text-lg">{correctAnswer}</p>
+                                            <p className="text-slate-600 text-sm mt-1">{currentQuestion.translation}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white/60 p-4 rounded-xl border border-slate-300/50">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex-shrink-0 text-lg w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center mt-1">
+                                            💡
+                                        </div>
+                                        <div>
+                                             <h4 className="font-semibold text-slate-700">Here's a tip</h4>
+                                             {isGenerating && (
+                                                 <div className="flex items-center gap-2 text-slate-600 mt-1">
+                                                    <svg className="animate-spin h-4 w-4 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                    <span>Just a moment, generating a tip...</span>
+                                                 </div>
+                                             )}
+                                             {explanation && (
+                                                 <p className="text-slate-800 mt-1">{explanation}</p>
+                                             )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <button onClick={handleContinue} className={`px-10 py-4 rounded-xl text-white font-bold shadow-md transition-colors ${feedbackButtonColor}`}>
+                    <button onClick={handleContinue} className={`self-center px-10 py-4 rounded-xl text-white font-bold shadow-md transition-colors ${feedbackButtonColor}`}>
                         Continue
                     </button>
                </div>

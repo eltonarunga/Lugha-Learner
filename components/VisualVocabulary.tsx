@@ -19,7 +19,8 @@ type VocabularyItem = {
 };
 
 const fileToGenerativePart = async (file: File) => {
-  const base64EncodedDataPromise = new Promise((resolve) => {
+  // FIX: Explicitly type the Promise to resolve with a string.
+  const base64EncodedDataPromise = new Promise<string>((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
     reader.readAsDataURL(file);
