@@ -3,7 +3,8 @@ import { LESSON_DATA } from '../constants';
 import { useLugha } from '../hooks/useLugha';
 import { QuizQuestion, QuestionType } from '../types';
 import ProgressBar from './ProgressBar';
-import { GoogleGenAI, GenerateContentResponse, Type } from '@google/genai';
+import { GenerateContentResponse, Type } from '@google/genai';
+import { getGeminiAI } from '../lib/gemini';
 
 const CheckIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -160,7 +161,7 @@ const EpicAdventure: React.FC<{ question: Extract<QuizQuestion, { type: Question
       try {
         setLoading(true);
         setError(null);
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+        const ai = getGeminiAI();
         const response: GenerateContentResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
           contents: question.prompt,
@@ -188,7 +189,8 @@ const EpicAdventure: React.FC<{ question: Extract<QuizQuestion, { type: Question
         setStoryData(parsedData);
       } catch (err) {
         console.error("Error generating story:", err);
-        setError("Oops! The storyteller seems to be taking a nap. Please try again later.");
+        const errorMessage = err instanceof Error ? err.message : "The storyteller seems to be taking a nap. Please try again later.";
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -347,7 +349,7 @@ const LessonView: React.FC<{ language: string, lessonId: number }> = ({ language
     if (!correct) {
       setIsGenerating(true);
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+        const ai = getGeminiAI();
         const prompt = `A language learner was answering a quiz question.
         Question: "${questionText}"
         Their incorrect answer: "${userAnswer}"

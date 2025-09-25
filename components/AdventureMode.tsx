@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLugha } from '../hooks/useLugha';
-import { GoogleGenAI } from '@google/genai';
+import { getGeminiAI } from '../lib/gemini';
 
 const PageHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
     <div className="flex items-center mb-6 relative">
@@ -14,7 +14,6 @@ const PageHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, on
 );
 
 const fileToGenerativePart = async (file: File) => {
-  // FIX: Explicitly type the Promise to resolve with a string.
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
@@ -54,7 +53,7 @@ const AdventureMode: React.FC = () => {
         setStory('');
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+            const ai = getGeminiAI();
             const imagePart = await fileToGenerativePart(image);
             const textPart = { text: `Create a short, exciting adventure story for a language learner. The story should be set in Kenya, exploring its beautiful landscapes. The main character is the person/creature in this image. The story should be simple and mostly in English, but introduce and repeat some simple ${selectedLanguage?.name} words related to the environment (e.g., journey, tree, river, animal, sun). Make sure to provide the English translation for the new words in parentheses the first time they appear. Keep the story to 4-5 paragraphs.` };
             
@@ -67,7 +66,8 @@ const AdventureMode: React.FC = () => {
 
         } catch (err) {
             console.error('Error generating story:', err);
-            setError('Failed to generate story. The storyteller might be on a break. Please try again.');
+            const errorMessage = err instanceof Error ? err.message : 'Failed to generate story. The storyteller might be on a break. Please try again.';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }

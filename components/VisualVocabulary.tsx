@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLugha } from '../hooks/useLugha';
-import { GoogleGenAI, Type } from '@google/genai';
+import { Type } from '@google/genai';
+import { getGeminiAI } from '../lib/gemini';
 
 const PageHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
     <div className="flex items-center mb-6 relative">
@@ -19,7 +20,6 @@ type VocabularyItem = {
 };
 
 const fileToGenerativePart = async (file: File) => {
-  // FIX: Explicitly type the Promise to resolve with a string.
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
@@ -99,7 +99,7 @@ const VisualVocabulary: React.FC = () => {
         setResults([]);
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+            const ai = getGeminiAI();
             const textPart = { text: `Identify the main objects in this image. For each object, provide its name in English and its translation in ${selectedLanguage?.name}.` };
             
             const response = await ai.models.generateContent({
@@ -128,7 +128,8 @@ const VisualVocabulary: React.FC = () => {
             setResults(parsed.items || []);
         } catch (err) {
             console.error('Error analyzing image:', err);
-            setError('Failed to analyze the image. Please try a different one.');
+            const errorMessage = err instanceof Error ? err.message : 'Failed to analyze the image. Please try a different one.';
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -172,7 +173,12 @@ const VisualVocabulary: React.FC = () => {
                 )}
             </div>
             
-            {loading && <div className="text-center p-4">Analyzing image...</div>}
+            {loading && (
+              <div className="text-center p-8 mt-6">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-green-500 mx-auto"></div>
+                  <p className="text-slate-600 font-semibold mt-4">Analyzing your image...</p>
+              </div>
+            )}
             {error && <p className="text-red-500 text-center p-4 bg-red-50 rounded-lg">{error}</p>}
 
             {results.length > 0 && (

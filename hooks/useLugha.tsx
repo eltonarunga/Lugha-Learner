@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Language, UserProgress } from '../types';
-import { LANGUAGES } from '../constants';
+import { LANGUAGES, DAILY_GOALS, LESSON_DATA } from '../constants';
 
 type LughaView = 'login' | 'language-selection' | 'dashboard' | 'lesson' | 'dictionary' | 'profile' | 'leaderboard' | 'goals' | 'adventure' | 'visual-vocab' | 'conversation';
 
@@ -40,23 +40,93 @@ const initialProgress: UserProgress = {
   streak: 0,
 };
 
+const getStoredState = <T,>(key: string, defaultValue: T): T => {
+    const stored = localStorage.getItem(key);
+    if (!stored) return defaultValue;
+    try {
+        return JSON.parse(stored) as T;
+    } catch (error) {
+        console.error(`Error parsing localStorage key "${key}":`, error);
+        return defaultValue;
+    }
+};
+
+
 export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [view, setView] = useState<LughaView>('login');
-  const [user, setUser] = useState<User | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(null);
-  const [userProgress, setUserProgress] = useState<UserProgress>(initialProgress);
+  const [user, setUser] = useState<User | null>(() => getStoredState('lugha-user', null));
+  const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(() => getStoredState('lugha-selectedLanguage', null));
+  const [userProgress, setUserProgress] = useState<UserProgress>(() => getStoredState('lugha-userProgress', initialProgress));
+  const [activeGoalId, setActiveGoalId] = useState<string | null>(() => getStoredState('lugha-activeGoalId', null));
+  const [dailyProgress, setDailyProgress] = useState(() => getStoredState('lugha-dailyProgress', { xp: 0, lessonsCompleted: 0 }));
+  
+  const [view, setView] = useState<LughaView>(() => {
+    const storedUser = getStoredState('lugha-user', null);
+    if (!storedUser) return 'login';
+    const storedLang = getStoredState('lugha-selectedLanguage', null);
+    if (!storedLang) return 'language-selection';
+    return 'dashboard';
+  });
+
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null);
-  const [activeGoalId, setActiveGoalId] = useState<string | null>(null);
-  const [dailyProgress, setDailyProgress] = useState({ xp: 0, lessonsCompleted: 0 });
+
+  useEffect(() => {
+      if (user) localStorage.setItem('lugha-user', JSON.stringify(user));
+      else localStorage.removeItem('lugha-user');
+  }, [user]);
+
+  useEffect(() => {
+      if (user && selectedLanguage) localStorage.setItem('lugha-selectedLanguage', JSON.stringify(selectedLanguage));
+      else localStorage.removeItem('lugha-selectedLanguage');
+  }, [user, selectedLanguage]);
+
+  useEffect(() => {
+      if (user) localStorage.setItem('lugha-userProgress', JSON.stringify(userProgress));
+      else localStorage.removeItem('lugha-userProgress');
+  }, [user, userProgress]);
+  
+  useEffect(() => {
+      if (user) localStorage.setItem('lugha-activeGoalId', JSON.stringify(activeGoalId));
+      else localStorage.removeItem('lugha-activeGoalId');
+  }, [user, activeGoalId]);
+
+  useEffect(() => {
+      if (user) {
+          const today = new Date().toDateString();
+          const lastDate = getStoredState('lugha-lastActiveDate', null);
+          if (today !== lastDate) {
+              setDailyProgress({ xp: 0, lessonsCompleted: 0 });
+              localStorage.setItem('lugha-dailyProgress', JSON.stringify({ xp: 0, lessonsCompleted: 0 }));
+              localStorage.setItem('lugha-lastActiveDate', JSON.stringify(today));
+          }
+      }
+  }, [user]);
+
+  useEffect(() => {
+      if (user) localStorage.setItem('lugha-dailyProgress', JSON.stringify(dailyProgress));
+      else localStorage.removeItem('lugha-dailyProgress');
+  }, [user, dailyProgress]);
+
 
   const login = (name: string) => {
     setUser({ name, isGuest: false });
-    setView('language-selection');
+    const previouslySelectedLang = getStoredState('lugha-selectedLanguage', null);
+    if (previouslySelectedLang) {
+      setSelectedLanguage(previouslySelectedLang);
+      setView('dashboard');
+    } else {
+      setView('language-selection');
+    }
   };
 
   const loginAsGuest = () => {
     setUser({ name: 'Guest', isGuest: true });
-    setView('language-selection');
+    const previouslySelectedLang = getStoredState('lugha-selectedLanguage', null);
+    if (previouslySelectedLang) {
+      setSelectedLanguage(previouslySelectedLang);
+      setView('dashboard');
+    } else {
+      setView('language-selection');
+    }
   };
 
   const logout = () => {
@@ -66,6 +136,7 @@ export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setActiveLessonId(null);
       setActiveGoalId(null);
       setDailyProgress({ xp: 0, lessonsCompleted: 0 });
+      localStorage.clear();
       setView('login');
   };
 
@@ -81,15 +152,13 @@ export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setUserProgress(prev => {
       const currentCompleted = prev.completedLessons[languageId] || [];
       if (currentCompleted.includes(lessonId)) {
-        return prev; // Lesson already completed, no change in progress.
+        return prev;
       }
 
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      
       const lastDateStr = prev.lastCompletionDate;
 
-      // If a lesson was already completed today, just add XP and the lesson.
       if (lastDateStr === todayStr) {
         return {
           ...prev,
@@ -101,14 +170,12 @@ export const LughaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         };
       }
 
-      // It's a new day of activity.
       const yesterday = new Date();
       yesterday.setDate(today.getDate() - 1);
       const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
 
-      let newStreak = 1; // Default to 1 for a new session. Also handles first-ever lesson.
+      let newStreak = 1;
       if (lastDateStr === yesterdayStr) {
-        // If the last activity was yesterday, increment the streak.
         newStreak = prev.streak + 1;
       }
       

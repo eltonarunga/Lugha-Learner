@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLugha } from '../hooks/useLugha';
-import { GoogleGenAI, Chat } from '@google/genai';
+import { Chat } from '@google/genai';
+import { getGeminiAI } from '../lib/gemini';
 
 const PageHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
     <div className="flex items-center mb-6 relative">
@@ -23,13 +24,14 @@ const ConversationTutor: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const chatRef = useRef<Chat | null>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const initChat = () => {
+        const initChat = async () => {
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+                const ai = getGeminiAI();
                 chatRef.current = ai.chats.create({
                     model: 'gemini-2.5-flash',
                     config: {
@@ -37,12 +39,12 @@ const ConversationTutor: React.FC = () => {
                     }
                 });
                 
-                // Start the conversation with the model's greeting
-                handleSendMessage("Hello", true);
+                await handleSendMessage("Hello", true);
 
-            } catch (error) {
-                console.error("Failed to initialize chat:", error);
-                setMessages([{ role: 'model', text: "Sorry, I'm having trouble starting our chat. Please try again later." }]);
+            } catch (err) {
+                console.error("Failed to initialize chat:", err);
+                const errorMessage = err instanceof Error ? err.message : "Sorry, I'm having trouble starting our chat. Please try again later.";
+                setError(errorMessage);
             }
         };
         if (selectedLanguage) {
@@ -65,6 +67,7 @@ const ConversationTutor: React.FC = () => {
         }
         setInput('');
         setIsLoading(true);
+        setError(null);
 
         try {
             const stream = await chatRef.current.sendMessageStream({ message: textToSend });
@@ -79,9 +82,12 @@ const ConversationTutor: React.FC = () => {
                     return newMessages;
                 });
             }
-        } catch (error) {
-            console.error("Error sending message:", error);
-             setMessages(prev => [...prev, { role: 'model', text: "Sorry, I encountered an error. Let's try that again." }]);
+        } catch (err) {
+            console.error("Error sending message:", err);
+            const errorMessage = err instanceof Error ? err.message : "Sorry, I encountered an error. Let's try that again.";
+            setError(errorMessage);
+            // Remove the empty placeholder message on error
+            setMessages(prev => prev.filter(msg => msg.text !== ''));
         } finally {
             setIsLoading(false);
         }
@@ -105,6 +111,8 @@ const ConversationTutor: React.FC = () => {
                     </div>
                 ))}
             </div>
+             
+             {error && <p className="text-red-500 text-center text-sm mt-2">{error}</p>}
 
             <form onSubmit={handleFormSubmit} className="mt-4 flex items-center gap-3">
                 <input
@@ -112,10 +120,10 @@ const ConversationTutor: React.FC = () => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type your message..."
-                    disabled={isLoading}
-                    className="flex-grow w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow shadow-sm"
+                    disabled={isLoading || !!error}
+                    className="flex-grow w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow shadow-sm disabled:bg-slate-100"
                 />
-                <button type="submit" disabled={isLoading || !input.trim()} className="bg-blue-500 text-white rounded-full p-3 shadow-md hover:bg-blue-600 disabled:bg-slate-400 disabled:cursor-not-allowed transition-all transform hover:scale-110">
+                <button type="submit" disabled={isLoading || !input.trim() || !!error} className="bg-blue-500 text-white rounded-full p-3 shadow-md hover:bg-blue-600 disabled:bg-slate-400 disabled:cursor-not-allowed transition-all transform hover:scale-110">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
