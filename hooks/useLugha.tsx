@@ -1,8 +1,9 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Language, UserProgress } from '../types';
 import { LANGUAGES, DAILY_GOALS, LESSON_DATA } from '../constants';
 
-type LughaView = 'login' | 'language-selection' | 'dashboard' | 'lesson' | 'dictionary' | 'profile' | 'leaderboard' | 'goals' | 'adventure' | 'visual-vocab' | 'conversation';
+type LughaView = 'login' | 'language-selection' | 'dashboard' | 'lesson' | 'dictionary' | 'profile' | 'leaderboard' | 'goals' | 'adventure' | 'visual-vocab' | 'conversation' | 'live-tutor' | 'creative-corner';
 
 interface User {
     name: string;

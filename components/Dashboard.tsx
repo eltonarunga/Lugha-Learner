@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Language, Level, Lesson } from '../types';
 import { LESSON_DATA } from '../constants';
@@ -180,6 +181,20 @@ const Dashboard: React.FC<{ language: Language }> = ({ language }) => {
                 description="Practice your skills with an AI tutor."
                 onClick={() => setView('conversation')}
                 color="purple"
+            />
+            <ExploreCard
+                icon="🎙️"
+                title="Live Conversation Tutor"
+                description="Practice speaking with a real-time AI tutor."
+                onClick={() => setView('live-tutor')}
+                color="slate"
+            />
+            <ExploreCard
+                icon="🧠"
+                title="Creative Corner"
+                description="Challenge the AI with complex creative tasks."
+                onClick={() => setView('creative-corner')}
+                color="blue"
             />
         </div>
       </div>

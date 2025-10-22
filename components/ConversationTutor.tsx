@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useLugha } from '../hooks/useLugha';
 import { Chat } from '@google/genai';
@@ -33,7 +34,7 @@ const ConversationTutor: React.FC = () => {
             try {
                 const ai = getGeminiAI();
                 chatRef.current = ai.chats.create({
-                    model: 'gemini-2.5-flash',
+                    model: 'gemini-flash-lite-latest',
                     config: {
                          systemInstruction: `You are a friendly and patient language tutor for ${selectedLanguage?.name}. Your name is Kazi. Engage the user in a simple, encouraging conversation. Keep your responses short and clear. Correct the user's mistakes gently and explain the correction. Start the conversation by greeting the user in ${selectedLanguage?.name} and asking them how they are.`
                     }
